@@ -1,531 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
-<title>TGame 双人诗词小游戏 V1.1</title>
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>TGame 双人诗词小游戏</title>
+
 
 <style>
 
 body{
+
 margin:0;
+
 background:#111;
+
 color:white;
-font-family:"Microsoft YaHei";
+
+font-family:
+"Microsoft YaHei";
+
 text-align:center;
+
 }
+
+
+.container{
+
+width:90%;
+
+max-width:420px;
+
+margin:40px auto;
+
+background:#222;
+
+border-radius:20px;
+
+padding:20px;
+
+}
+
 
 h1{
-margin-top:30px;
+
 color:#ffd700;
+
 }
 
-.box{
-width:85%;
-max-width:420px;
-margin:auto;
-background:#222;
-padding:20px;
-border-radius:20px;
-}
-
-.score{
-display:flex;
-justify-content:space-around;
-font-size:18px;
-}
-
-.question{
-margin:25px;
-font-size:22px;
-}
 
 button{
+
 width:90%;
+
+padding:14px;
+
 margin:8px;
-padding:15px;
-font-size:18px;
-border:none;
+
+border:0;
+
 border-radius:12px;
-background:#d9ad25;
-}
 
-button:disabled{
-background:#555;
-}
+background:#d9b437;
 
-
-#time{
-color:#ff5555;
-font-size:22px;
-}
-
-
-</style>
-
-</head>
-
-
-<body>
-
-
-<h1>🎮 TGame</h1>
-
-<p>双人诗词小游戏 V1.1</p>
-
-
-<div class="box">
-
-
-<div class="score">
-
-<div>
-玩家1<br>
-<span id="p1">0</span>
-</div>
-
-<div>
-玩家2<br>
-<span id="p2">0</span>
-</div>
-
-</div>
-
-
-<h2 id="turn">
-玩家1回合
-</h2>
-
-
-<div id="time">
-10
-</div>
-
-
-<div class="question" id="question">
-点击开始
-</div>
-
-
-<div id="answers"></div>
-
-
-<button onclick="startGame()">
-开始游戏
-</button>
-
-
-</div>
-
-
-
-<script>
-
-
-let poems=[
-
-
-{
-q:"床前明月光，下一句是？",
-a:"疑是地上霜",
-w:[
-"举头望明月",
-"低头思故乡",
-"明月几时有"
-]
-},
-
-
-{
-q:"白日依山尽，下一句是？",
-a:"黄河入海流",
-w:[
-"欲穷千里目",
-"更上一层楼",
-"江南可采莲"
-]
-},
-
-
-{
-q:"春眠不觉晓，下一句是？",
-a:"处处闻啼鸟",
-w:[
-"夜来风雨声",
-"花落知多少",
-"谁知盘中餐"
-]
-},
-
-
-{
-q:"举头望明月，下一句是？",
-a:"低头思故乡",
-w:[
-"疑是地上霜",
-"月落乌啼霜满天",
-"孤帆远影碧空尽"
-]
-}
-
-
-];
-
-
-
-let player=1;
-
-let score=[0,0];
-
-let used=[];
-
-let timer;
-
-let time=10;
-
-let playing=false;
-
-
-
-function shuffle(arr){
-
-return arr.sort(()=>Math.random()-0.5);
+font-size:16px;
 
 }
 
 
-
-function startGame(){
-
-score=[0,0];
-
-player=1;
-
-used=[];
-
-playing=true;
-
-updateScore();
-
-nextQuestion();
-
-}
-
-
-
-function nextQuestion(){
-
-
-clearInterval(timer);
-
-
-time=10;
-
-document.getElementById("time").innerHTML=time;
-
-
-
-timer=setInterval(()=>{
-
-
-time--;
-
-document.getElementById("time").innerHTML=time;
-
-
-if(time<=0){
-
-clearInterval(timer);
-
-alert("时间到！");
-
-nextTurn();
-
-}
-
-
-},1000);
-
-
-
-if(used.length>=poems.length){
-
-used=[];
-
-}
-
-
-
-let index;
-
-
-do{
-
-index=Math.floor(Math.random()*poems.length);
-
-}
-
-while(used.includes(index));
-
-
-used.push(index);
-
-
-
-let data=poems[index];
-
-
-let options=shuffle([
-data.a,
-...data.w
-]);
-
-
-
-document.getElementById("turn").innerHTML=
-"玩家"+player+"回合";
-
-
-
-document.getElementById("question").innerHTML=
-data.q;
-
-
-
-let html="";
-
-
-options.forEach(item=>{
-
-
-html+=`
-
-<button onclick="answer(this,'${item}','${data.a}')">
-${item}
-</button>
-
-`;
-
-});
-
-
-document.getElementById("answers").innerHTML=html;
-
-
-}
-
-
-
-
-function answer(btn,value,right){
-
-
-clearInterval(timer);
-
-
-
-let buttons=document.querySelectorAll("#answers button");
-
-
-buttons.forEach(b=>{
-
-b.disabled=true;
-
-});
-
-
-
-if(value==right){
-
-score[player-1]++;
-
-btn.style.background="#00aa55";
-
-
-}else{
-
-
-score[player-1]--;
-
-btn.style.background="#aa0000";
-
-
-}
-
-
-
-updateScore();
-
-
-setTimeout(()=>{
-
-nextTurn();
-
-},800);
-
-
-
-}
-
-
-
-function nextTurn(){
-
-
-player++;
-
-if(player>2){
-
-player=1;
-
-}
-
-
-nextQuestion();
-
-
-}
-
-
-
-function updateScore(){
-
-document.getElementById("p1").innerHTML=score[0];
-
-document.getElementById("p2").innerHTML=score[1];
-
-}
-
-
-
-</script>
-
-
-</body>
-
-</html>
-.card{
-
-background:#222;
-border-radius:20px;
-padding:25px;
-margin-top:20px;
-
-}
-
-
-button{
+input{
 
 width:80%;
-padding:15px;
 
-margin:10px;
+padding:12px;
 
-border:none;
+border-radius:10px;
 
-border-radius:15px;
+border:0;
 
-font-size:18px;
-
-background:#d4af37;
-
-color:#111;
+text-align:center;
 
 }
 
 
-button:hover{
+.hidden{
 
-background:#fff;
+display:none;
+
+}
+
+
+.info{
+
+display:flex;
+
+justify-content:space-around;
 
 }
 
 
 .score{
 
-display:flex;
+font-size:25px;
 
-justify-content:space-around;
+color:#ffd700;
 
-font-size:20px;
+}
+
+
+.option{
+
+background:#d9b437;
 
 }
 
 
 #question{
 
-font-size:22px;
+margin:25px 0;
 
 line-height:1.6;
 
 }
 
 
-.win{
-
-font-size:30px;
-
-color:#ffd700;
-
-}
-
 </style>
 
-</head>
 
+</head>
 
 
 <body>
 
 
-<div class="box">
+<div class="container">
 
 
-<h1>🎮 TGame</h1>
-
-<p>双人诗词小游戏 V1.0</p>
-
-
-<div class="card">
+<h1>
+🎮 TGame
+</h1>
 
 
-<div class="score">
-
-<div>
-玩家1
-<br>
-<span id="p1">0</span>
-</div>
-
-
-<div>
-玩家2
-<br>
-<span id="p2">0</span>
-</div>
-
-</div>
+<p>
+双人诗词问答
+</p>
 
 
 
-<h2 id="turn">
-玩家1回合
-</h2>
+<div id="login">
 
 
-<div id="question">
+<button onclick="createRoom()">
 
-点击开始游戏
+创建房间
 
-</div>
-
-
-
-<div id="answers"></div>
+</button>
 
 
+<input id="roomInput"
+placeholder="输入房间号">
 
-<button onclick="startGame()">
-开始游戏
+
+<button onclick="joinRoom()">
+
+加入房间
+
 </button>
 
 
@@ -533,17 +176,513 @@ color:#ffd700;
 
 
 
-<div id="result"></div>
+
+<div id="game"
+class="hidden">
+
+
+
+<div class="info">
+
+
+<div>
+
+玩家1
+
+<br>
+
+<span id="score1"
+class="score">
+
+0
+
+</span>
+
+</div>
+
+
+
+<div>
+
+玩家2
+
+<br>
+
+<span id="score2"
+class="score">
+
+0
+
+</span>
+
+</div>
+
 
 
 </div>
 
 
 
-<script>
+<h3 id="player">
+
+</h3>
 
 
-let poems=[
+
+<h3 id="status">
+
+</h3>
+
+
+<h2 id="question">
+
+</h2>
+
+
+
+<div id="options">
+
+</div>
+
+
+
+<p id="roomShow">
+
+</p>
+
+
+</div>
+
+
+</div>
+
+<script type="module">
+
+
+// =============================
+// Firebase SDK
+// =============================
+
+
+import {
+
+initializeApp
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+
+import {
+
+getDatabase,
+
+ref,
+
+set,
+
+get,
+
+update,
+
+onValue
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+
+
+// =============================
+// Firebase配置
+// =============================
+
+
+const firebaseConfig = {
+
+
+apiKey:
+"AIzaSyAol_a1CtPS-j8q7ugcDNBm13YeIuQd8ps",
+
+
+authDomain:
+"tgema-9e482.firebaseapp.com",
+
+
+projectId:
+"tgema-9e482",
+
+
+storageBucket:
+"tgema-9e482.firebasestorage.app",
+
+
+messagingSenderId:
+"160811004171",
+
+
+appId:
+"1:160811004171:web:c36ceca017bf59e2d1b20e",
+
+
+measurementId:
+"G-NWVCZRK6VF"
+
+};
+
+
+
+// 初始化
+
+const app =
+initializeApp(firebaseConfig);
+
+
+
+const db =
+getDatabase(app);
+
+
+
+
+// =============================
+// 游戏变量
+// =============================
+
+
+let roomID="";
+
+let playerID="";
+
+let myName="";
+
+let locked=false;
+
+
+//题目数量
+
+const maxQuestion=20;
+
+// =============================
+// 创建房间
+// =============================
+
+
+async function createRoom(){
+
+
+roomID =
+Math.floor(
+100000+
+Math.random()*900000
+)
+.toString();
+
+
+
+playerID="player1";
+
+myName="玩家1";
+
+
+
+await set(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+{
+
+
+player1:{
+
+score:0
+
+},
+
+
+
+player2:null,
+
+
+
+// 当前轮到谁
+
+turn:1,
+
+
+
+// 当前题号
+
+questionIndex:0,
+
+
+
+// 当前题目
+
+question:null,
+
+
+
+// 游戏结束
+
+finished:false
+
+
+}
+
+);
+
+
+
+
+enterGame();
+
+
+listenRoom();
+
+
+
+}
+
+
+
+
+
+
+
+// =============================
+// 加入房间
+// =============================
+
+
+async function joinRoom(){
+
+
+
+let code =
+document
+.getElementById("roomInput")
+.value
+.trim();
+
+
+
+if(code==""){
+
+alert("请输入房间号");
+
+return;
+
+}
+
+
+
+roomID=code;
+
+
+
+let snap =
+await get(
+
+ref(
+db,
+"rooms/"+roomID
+)
+
+);
+
+
+
+if(!snap.exists()){
+
+
+alert("房间不存在");
+
+
+return;
+
+
+}
+
+
+
+let data=snap.val();
+
+
+
+if(data.player2){
+
+
+alert("房间已满");
+
+
+return;
+
+
+}
+
+
+
+playerID="player2";
+
+myName="玩家2";
+
+
+
+await update(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+{
+
+
+player2:{
+
+
+score:0
+
+
+}
+
+
+}
+
+);
+
+
+
+
+enterGame();
+
+
+listenRoom();
+
+
+
+}
+
+
+
+
+
+
+// =============================
+// 进入游戏界面
+// =============================
+
+
+function enterGame(){
+
+
+
+document
+.getElementById("login")
+.classList
+.add("hidden");
+
+
+
+document
+.getElementById("game")
+.classList
+.remove("hidden");
+
+
+
+document
+.getElementById("player")
+.innerHTML=
+"身份："+myName;
+
+
+
+document
+.getElementById("roomShow")
+.innerHTML=
+"房间号："+roomID;
+
+
+}
+
+
+
+
+
+
+// =============================
+// 监听房间
+// =============================
+
+
+function listenRoom(){
+
+
+
+onValue(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+
+(snapshot)=>{
+
+
+let data =
+snapshot.val();
+
+
+
+if(!data)return;
+
+
+
+document
+.getElementById("score1")
+.innerHTML =
+data.player1?.score || 0;
+
+
+
+document
+.getElementById("score2")
+.innerHTML =
+data.player2?.score || 0;
+
+
+
+showQuestion(data);
+
+
+
+}
+
+
+);
+
+
+
+}
+
+// =============================
+// 诗词题库
+// =============================
+
+
+const poems=[
 
 
 {
@@ -556,259 +695,605 @@ a:[
 "明月几时有"
 ],
 
-c:0
+correct:"疑是地上霜"
+
 },
 
 
-
 {
-q:"白日依山尽，下一句？",
+q:"白日依山尽，下一句是？",
 
 a:[
 "黄河入海流",
 "欲穷千里目",
 "更上一层楼",
-"江山如此多娇"
+"孤帆远影碧空尽"
 ],
 
-c:2
+correct:"黄河入海流"
+
 },
 
 
-
 {
-q:"海内存知己，下一句？",
+q:"海内存知己，下一句是？",
 
 a:[
 "天涯若比邻",
 "相逢何必曾相识",
-"君不见黄河之水",
-"人生得意须尽欢"
+"君自故乡来",
+"明月照大江"
 ],
 
-c:0
+correct:"天涯若比邻"
+
 },
 
 
-
 {
-q:"大漠孤烟直，下一句？",
+q:"春眠不觉晓，下一句是？",
 
 a:[
-"长河落日圆",
-"孤帆远影碧空尽",
-"千里共婵娟",
+"处处闻啼鸟",
+"夜来风雨声",
+"花落知多少",
 "月落乌啼霜满天"
 ],
 
-c:0
+correct:"处处闻啼鸟"
+
 },
 
 
-
 {
-q:"会当凌绝顶，下一句？",
+q:"举头望明月，下一句是？",
 
 a:[
-"一览众山小",
-"凌寒独自开",
-"飞流直下三千尺",
-"天下谁人不识君"
+"低头思故乡",
+"疑是地上霜",
+"明月几时有",
+"月是故乡明"
 ],
 
-c:0
-},
+correct:"低头思故乡"
 
-
-
-{
-q:"桃李不言，下自成蹊，出自？",
-
-a:[
-"史记",
-"诗经",
-"论语",
-"唐诗三百首"
-],
-
-c:0
 }
-
 
 
 ];
 
 
 
-let p1=0;
-
-let p2=0;
-
-let turn=1;
-
-let count=0;
-
-let current;
 
 
+// =============================
+// 创建一道题
+// =============================
 
-function startGame(){
 
-p1=0;
+function createQuestion(index){
 
-p2=0;
 
-turn=1;
+let p =
+poems[
+index % poems.length
+];
 
-count=0;
 
-document.getElementById("p1").innerHTML=0;
 
-document.getElementById("p2").innerHTML=0;
+//复制选项
 
-document.getElementById("result").innerHTML="";
+let options =
+[...p.a];
 
-next();
+
+
+//随机打乱
+
+for(
+let i=options.length-1;
+i>0;
+i--
+){
+
+let j =
+Math.floor(
+Math.random()*(i+1)
+);
+
+
+[
+options[i],
+options[j]
+]=
+[
+options[j],
+options[i]
+];
+
 
 }
 
 
 
-function next(){
+
+return {
 
 
-if(count>=10){
+q:p.q,
 
-endGame();
+
+a:options,
+
+
+correct:p.correct
+
+
+};
+
+
+}
+
+
+
+
+
+// =============================
+// 显示题目
+// =============================
+
+
+function showQuestion(data){
+
+
+if(!data.player2){
+
+document
+.getElementById("status")
+.innerHTML=
+"等待玩家2加入...";
+
 
 return;
 
 }
 
 
-let index=Math.floor(Math.random()*poems.length);
 
+if(data.finished){
 
-current=poems[index];
-
-
-document.getElementById("turn").innerHTML=
-"玩家"+turn+"回合";
-
-
-document.getElementById("question").innerHTML=
-current.q;
-
-
-let html="";
-
-
-current.a.forEach((x,i)=>{
-
-
-html+=
-
-"<button onclick='answer("+i+")'>"+x+"</button>";
-
-
-});
-
-
-document.getElementById("answers").innerHTML=html;
-
+return;
 
 }
 
 
 
-function answer(i){
+//第一次创建题目
+
+if(!data.question){
 
 
-if(i==current.c){
+
+if(playerID=="player1"){
 
 
-if(turn==1){
-
-p1++;
-
-document.getElementById("p1").innerHTML=p1;
-
-}else{
-
-p2++;
-
-document.getElementById("p2").innerHTML=p2;
-
-}
+let q =
+createQuestion(
+data.questionIndex
+);
 
 
-alert("回答正确！");
 
+update(
 
-}else{
+ref(
+db,
+"rooms/"+roomID
+),
 
+{
 
-alert("回答错误！");
+question:q
 
 }
 
-
-
-count++;
-
-
-turn=turn==1?2:1;
-
-
-next();
+);
 
 
 }
 
 
-
-function endGame(){
-
-
-let text="";
-
-
-if(p1>p2){
-
-text="🎉 玩家1胜利！";
+return;
 
 }
 
-else if(p2>p1){
 
-text="🎉 玩家2胜利！";
+
+
+
+let q =
+data.question;
+
+
+
+document
+.getElementById("question")
+.innerHTML =
+q.q;
+
+
+
+let myTurn =
+
+(
+data.turn==1
+&&
+playerID=="player1"
+)
+
+||
+
+(
+data.turn==2
+&&
+playerID=="player2"
+);
+
+
+
+document
+.getElementById("status")
+.innerHTML =
+
+myTurn
+
+?
+
+"轮到你答题"
+
+:
+
+"等待对方答题";
+
+
+
+
+let box =
+document
+.getElementById("options");
+
+
+box.innerHTML="";
+
+
+
+q.a.forEach(item=>{
+
+
+let btn =
+document.createElement("button");
+
+
+
+btn.className="option";
+
+
+
+btn.innerHTML=item;
+
+
+
+if(myTurn){
+
+
+btn.onclick=()=>{
+
+
+answer(
+item,
+data
+);
+
+
+};
+
 
 }
 
 else{
 
-text="🤝 平局！";
+
+btn.disabled=true;
+
 
 }
 
 
 
-document.getElementById("answers").innerHTML="";
+box.appendChild(btn);
 
 
-document.getElementById("question").innerHTML=
-"游戏结束";
+
+});
 
 
-document.getElementById("result").innerHTML=
-
-"<div class='win'>"+text+
-
-"<br>最终比分 "+p1+" : "+p2+
-
-"</div>";
 
 }
+
+// =============================
+// 回答问题
+// =============================
+
+
+async function answer(choice,data){
+
+
+if(locked){
+
+return;
+
+}
+
+
+locked=true;
+
+
+
+let correct =
+data.question.correct;
+
+
+
+let right =
+choice===correct;
+
+
+
+let score1 =
+data.player1?.score || 0;
+
+
+let score2 =
+data.player2?.score || 0;
+
+
+
+// 玩家1答题
+
+if(playerID=="player1"){
+
+
+
+if(right){
+
+score1+=10;
+
+}
+
+
+
+await update(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+{
+
+
+"player1/score":score1,
+
+
+turn:2
+
+
+}
+
+);
+
+
+
+}
+
+
+
+// 玩家2答题
+
+else{
+
+
+
+if(right){
+
+score2+=10;
+
+}
+
+
+
+let next =
+Number(
+data.questionIndex
+)+1;
+
+
+
+if(next>=maxQuestion){
+
+
+
+await update(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+{
+
+
+"player2/score":score2,
+
+
+finished:true,
+
+
+turn:0
+
+
+}
+
+
+);
+
+
+
+}else{
+
+
+
+let newQuestion =
+createQuestion(next);
+
+
+
+await update(
+
+ref(
+db,
+"rooms/"+roomID
+),
+
+{
+
+
+"player2/score":score2,
+
+
+questionIndex:next,
+
+
+question:newQuestion,
+
+
+turn:1
+
+
+}
+
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+setTimeout(()=>{
+
+
+locked=false;
+
+
+},500);
+
+
+
+}
+
+
+
+
+
+// =============================
+// 游戏结束显示
+// =============================
+
+
+function showResult(data){
+
+
+
+let s1 =
+data.player1?.score || 0;
+
+
+let s2 =
+data.player2?.score || 0;
+
+
+
+document
+.getElementById("question")
+.innerHTML=
+"🎉 游戏结束";
+
+
+
+document
+.getElementById("options")
+.innerHTML=
+"";
+
+
+let text="";
+
+
+if(s1>s2){
+
+text="🏆 玩家1胜利";
+
+}
+
+else if(s2>s1){
+
+text="🏆 玩家2胜利";
+
+}
+
+else{
+
+text="🤝 平局";
+
+}
+
+
+
+document
+.getElementById("status")
+.innerHTML=
+
+text+
+
+"<br>玩家1："+s1+
+"分<br>玩家2："+s2+
+"分";
+
+
+
+}
+
+
+
+
+
+// =============================
+// 绑定按钮
+// =============================
+
+
+window.createRoom =
+createRoom;
+
+
+window.joinRoom =
+joinRoom;
 
 
 
@@ -816,5 +1301,6 @@ document.getElementById("result").innerHTML=
 
 
 </body>
+
 
 </html>
