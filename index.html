@@ -5,37 +5,28 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>TGame 双人诗词小游戏</title>
+<title>TGame 双人诗词对战 V2.0</title>
 
 
 <style>
 
 body{
-
 margin:0;
-
 background:#111;
-
 color:white;
-
-font-family:
-"Microsoft YaHei";
-
+font-family:"Microsoft YaHei";
 text-align:center;
-
 }
 
 
 .container{
 
 width:90%;
+max-width:430px;
 
-max-width:420px;
-
-margin:40px auto;
+margin:30px auto;
 
 background:#222;
 
@@ -43,7 +34,10 @@ border-radius:20px;
 
 padding:20px;
 
+box-sizing:border-box;
+
 }
+
 
 
 h1{
@@ -51,6 +45,7 @@ h1{
 color:#ffd700;
 
 }
+
 
 
 button{
@@ -61,30 +56,46 @@ padding:14px;
 
 margin:8px;
 
-border:0;
+border:none;
 
 border-radius:12px;
 
+font-size:16px;
+
 background:#d9b437;
+
+color:#222;
+
+}
+
+
+
+button:disabled{
+
+background:#666;
+
+color:#aaa;
+
+}
+
+
+
+input{
+
+width:85%;
+
+padding:12px;
+
+margin:8px;
+
+border-radius:10px;
+
+border:none;
 
 font-size:16px;
 
 }
 
-
-input{
-
-width:80%;
-
-padding:12px;
-
-border-radius:10px;
-
-border:0;
-
-text-align:center;
-
-}
 
 
 .hidden{
@@ -94,38 +105,43 @@ display:none;
 }
 
 
+
 .info{
 
 display:flex;
 
 justify-content:space-around;
 
-}
-
-
-.score{
-
-font-size:25px;
-
-color:#ffd700;
+font-size:18px;
 
 }
 
-
-.option{
-
-background:#d9b437;
-
-}
 
 
 #question{
 
-margin:25px 0;
-
-line-height:1.6;
+min-height:60px;
 
 }
+
+
+
+.option{
+
+background:#ffd700;
+
+}
+
+
+
+#status{
+
+margin-top:20px;
+
+color:#00ff99;
+
+}
+
 
 
 </style>
@@ -140,13 +156,11 @@ line-height:1.6;
 <div class="container">
 
 
-<h1>
-🎮 TGame
-</h1>
+<h1>🎮 TGame</h1>
 
 
 <p>
-双人诗词问答
+双人诗词对战 V2.0
 </p>
 
 
@@ -154,21 +168,18 @@ line-height:1.6;
 <div id="login">
 
 
-<button onclick="createRoom()">
+<input 
+id="roomInput"
+placeholder="输入6位房间号">
 
+
+<button id="createBtn">
 创建房间
-
 </button>
 
 
-<input id="roomInput"
-placeholder="输入房间号">
-
-
-<button onclick="joinRoom()">
-
+<button id="joinBtn">
 加入房间
-
 </button>
 
 
@@ -177,13 +188,13 @@ placeholder="输入房间号">
 
 
 
-<div id="game"
-class="hidden">
+<div id="game" class="hidden">
 
+
+<h3 id="roomShow"></h3>
 
 
 <div class="info">
-
 
 <div>
 
@@ -191,11 +202,8 @@ class="hidden">
 
 <br>
 
-<span id="score1"
-class="score">
-
+<span id="score1">
 0
-
 </span>
 
 </div>
@@ -208,15 +216,11 @@ class="score">
 
 <br>
 
-<span id="score2"
-class="score">
-
+<span id="score2">
 0
-
 </span>
 
 </div>
-
 
 
 </div>
@@ -225,19 +229,15 @@ class="score">
 
 <h3 id="player">
 
-</h3>
-
-
-
-<h3 id="status">
+等待中...
 
 </h3>
+
 
 
 <h2 id="question">
 
 </h2>
-
 
 
 <div id="options">
@@ -246,34 +246,30 @@ class="score">
 
 
 
-<p id="roomShow">
+<div id="status">
 
-</p>
+</div>
+
 
 
 </div>
 
 
-</div>
 
+</div>
 <script type="module">
 
 
-// =============================
-// Firebase SDK
-// =============================
+// ==========================
+// Firebase
+// ==========================
 
 
 import {
-
 initializeApp
-
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 
 
 import {
@@ -288,144 +284,115 @@ get,
 
 update,
 
-onValue
+onValue,
+
+remove
 
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
 
 
-// =============================
-// Firebase配置
-// =============================
+
+const firebaseConfig={
 
 
-const firebaseConfig = {
+apiKey:"AIzaSyAol_a1CtPS-j8q7ugcDNBm13YeIuQd8ps",
 
+authDomain:"tgema-9e482.firebaseapp.com",
 
-apiKey:
-"AIzaSyAol_a1CtPS-j8q7ugcDNBm13YeIuQd8ps",
+projectId:"tgema-9e482",
 
+storageBucket:"tgema-9e482.firebasestorage.app",
 
-authDomain:
-"tgema-9e482.firebaseapp.com",
+messagingSenderId:"160811004171",
 
+appId:"1:160811004171:web:c36ceca017bf59e2d1b20e",
 
-projectId:
-"tgema-9e482",
+measurementId:"G-NWVCZRK6VF"
 
-
-storageBucket:
-"tgema-9e482.firebasestorage.app",
-
-
-messagingSenderId:
-"160811004171",
-
-
-appId:
-"1:160811004171:web:c36ceca017bf59e2d1b20e",
-
-
-measurementId:
-"G-NWVCZRK6VF"
 
 };
 
 
 
-// 初始化
-
-const app =
-initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
 
 
-
-const db =
-getDatabase(app);
+const db=getDatabase(app);
 
 
 
 
-// =============================
-// 游戏变量
-// =============================
+// ==========================
+// 玩家数据
+// ==========================
 
 
 let roomID="";
 
 let playerID="";
 
-let myName="";
-
-let locked=false;
+let gameListener=null;
 
 
-//题目数量
 
-const maxQuestion=20;
-
-// =============================
+// ==========================
 // 创建房间
-// =============================
+// ==========================
 
 
 async function createRoom(){
 
 
-let input =
-document
-.getElementById("roomInput")
-.value
-.trim();
+let input=
+document.getElementById("roomInput").value.trim();
 
 
 
-if(input.length<3){
+// 自定义房间号
 
-alert("请输入至少3位房间号");
-
-return;
-
-}
-
-
+if(input){
 
 roomID=input;
 
+}else{
 
-let old =
-await get(
-ref(db,"rooms/"+roomID)
-);
+roomID=
+Math.floor(
+100000+
+Math.random()*900000
+).toString();
+
+}
 
 
-if(old.exists()){
 
 
-alert("房间已经存在");
+let check=
+await get(ref(db,"rooms/"+roomID));
+
+
+
+if(check.exists()){
+
+alert("房间已存在，请换一个");
 
 return;
 
-
 }
+
 
 
 
 playerID="player1";
 
-myName="玩家1";
-
 
 
 await set(
-
 ref(db,"rooms/"+roomID),
-
 {
 
 
@@ -439,16 +406,16 @@ score:0
 player2:null,
 
 
+state:"waiting",
+
+
 turn:1,
 
 
-questionIndex:0,
+index:0,
 
 
-question:null,
-
-
-finished:false
+time:Date.now()
 
 
 }
@@ -457,11 +424,13 @@ finished:false
 
 
 
-enterGame();
+// 创建后立即进入
+
+enterRoom();
+
+
 
 listenRoom();
-
-
 
 
 }
@@ -472,24 +441,22 @@ listenRoom();
 
 
 
-// =============================
+// ==========================
 // 加入房间
-// =============================
+// ==========================
 
 
 async function joinRoom(){
 
 
 
-let code =
-document
-.getElementById("roomInput")
-.value
-.trim();
+roomID=
+document.getElementById("roomInput")
+.value.trim();
 
 
 
-if(!code){
+if(!roomID){
 
 alert("请输入房间号");
 
@@ -499,25 +466,16 @@ return;
 
 
 
-roomID=code;
-
-
-
-let snap =
-await get(
-ref(db,"rooms/"+roomID)
-);
+let snap=
+await get(ref(db,"rooms/"+roomID));
 
 
 
 if(!snap.exists()){
 
-
-alert("没有找到这个房间");
-
+alert("房间不存在");
 
 return;
-
 
 }
 
@@ -529,12 +487,9 @@ let data=snap.val();
 
 if(data.player2){
 
-
-alert("房间已经满了");
-
+alert("房间已经有人");
 
 return;
-
 
 }
 
@@ -542,21 +497,22 @@ return;
 
 playerID="player2";
 
-myName="玩家2";
-
 
 
 await update(
-
 ref(db,"rooms/"+roomID),
-
 {
+
 
 player2:{
 
 score:0
 
-}
+},
+
+
+state:"playing"
+
 
 }
 
@@ -564,7 +520,8 @@ score:0
 
 
 
-enterGame();
+enterRoom();
+
 
 listenRoom();
 
@@ -577,13 +534,12 @@ listenRoom();
 
 
 
-// =============================
+// ==========================
 // 进入游戏界面
-// =============================
+// ==========================
 
 
-function enterGame(){
-
+function enterRoom(){
 
 
 document
@@ -601,16 +557,16 @@ document
 
 
 document
-.getElementById("player")
+.getElementById("roomShow")
 .innerHTML=
-"身份："+myName;
+"房间号："+roomID;
 
 
 
 document
-.getElementById("roomShow")
+.getElementById("player")
 .innerHTML=
-"房间号："+roomID;
+"身份："+playerID;
 
 
 }
@@ -620,28 +576,25 @@ document
 
 
 
-// =============================
-// 监听房间
-// =============================
+// ==========================
+// 实时监听
+// ==========================
 
 
 function listenRoom(){
 
 
+if(gameListener)return;
 
+
+
+gameListener=
 onValue(
-
-ref(
-db,
-"rooms/"+roomID
-),
-
-
+ref(db,"rooms/"+roomID),
 (snapshot)=>{
 
 
-let data =
-snapshot.val();
+let data=snapshot.val();
 
 
 
@@ -651,111 +604,178 @@ if(!data)return;
 
 document
 .getElementById("score1")
-.innerHTML =
-data.player1?.score || 0;
+.innerHTML=
+data.player1?.score||0;
 
 
 
 document
 .getElementById("score2")
-.innerHTML =
-data.player2?.score || 0;
+.innerHTML=
+data.player2?.score||0;
 
 
+
+if(window.showQuestion){
 
 showQuestion(data);
+
+}
 
 
 
 }
-
 
 );
 
 
-
 }
 
-// =============================
-// 诗词题库
-// =============================
 
 
-const poems=[
+
+// 页面按钮绑定
+
+
+document
+.getElementById("createBtn")
+.onclick=createRoom;
+
+
+
+document
+.getElementById("joinBtn")
+.onclick=joinRoom;
+  // ==========================
+// 题目系统
+// ==========================
+
+
+// ==========================
+// 诗词题库系统 V2
+// ==========================
+
+
+let poems=[
 
 
 {
-q:"床前明月光，下一句是？",
-
+q:"床前明月光，下一句？",
 a:[
 "疑是地上霜",
 "举头望明月",
 "低头思故乡",
 "明月几时有"
 ],
-
-correct:"疑是地上霜"
-
+c:"疑是地上霜"
 },
 
 
 {
-q:"白日依山尽，下一句是？",
-
+q:"白日依山尽，下一句？",
 a:[
 "黄河入海流",
 "欲穷千里目",
 "更上一层楼",
 "孤帆远影碧空尽"
 ],
-
-correct:"黄河入海流"
-
+c:"黄河入海流"
 },
 
 
 {
-q:"海内存知己，下一句是？",
-
+q:"海内存知己，下一句？",
 a:[
 "天涯若比邻",
 "相逢何必曾相识",
-"君自故乡来",
+"君问归期未有期",
 "明月照大江"
 ],
-
-correct:"天涯若比邻"
-
+c:"天涯若比邻"
 },
 
 
 {
-q:"春眠不觉晓，下一句是？",
-
+q:"春眠不觉晓，下一句？",
 a:[
 "处处闻啼鸟",
 "夜来风雨声",
 "花落知多少",
 "月落乌啼霜满天"
 ],
-
-correct:"处处闻啼鸟"
-
+c:"处处闻啼鸟"
 },
 
 
 {
-q:"举头望明月，下一句是？",
-
+q:"举头望明月，下一句？",
 a:[
 "低头思故乡",
 "疑是地上霜",
 "明月几时有",
 "月是故乡明"
 ],
+c:"低头思故乡"
+},
 
-correct:"低头思故乡"
 
+{
+q:"独在异乡为异客，下一句？",
+a:[
+"每逢佳节倍思亲",
+"遍插茱萸少一人",
+"遥知兄弟登高处",
+"故人西辞黄鹤楼"
+],
+c:"每逢佳节倍思亲"
+},
+
+
+{
+q:"黄河远上白云间，下一句？",
+a:[
+"一片孤城万仞山",
+"黄河入海流",
+"长河落日圆",
+"大漠孤烟直"
+],
+c:"一片孤城万仞山"
+},
+
+
+{
+q:"桃李不言，下自成蹊，出自？",
+a:[
+"史记",
+"诗经",
+"论语",
+"楚辞"
+],
+c:"史记"
+},
+
+
+{
+q:"会当凌绝顶，下一句？",
+a:[
+"一览众山小",
+"一片孤城万仞山",
+"欲穷千里目",
+"不尽长江滚滚来"
+],
+c:"一览众山小"
+},
+
+
+{
+q:"欲穷千里目，下一句？",
+a:[
+"更上一层楼",
+"黄河入海流",
+"孤帆远影碧空尽",
+"千山鸟飞绝"
+],
+c:"更上一层楼"
 }
 
 
@@ -764,51 +784,80 @@ correct:"低头思故乡"
 
 
 
-
-// =============================
-// 创建一道题
-// =============================
-
-
-function createQuestion(index){
+// ==========================
+// 随机抽题 防重复
+// ==========================
 
 
-let p =
-poems[
-index % poems.length
-];
+function createGameQuestions(){
 
 
+let list=[];
 
-//复制选项
 
-let options =
-[...p.a];
+let pool=[...poems];
 
 
 
-//随机打乱
+while(list.length<20){
 
-for(
-let i=options.length-1;
-i>0;
-i--
-){
 
-let j =
+
+if(pool.length===0){
+
+pool=[...poems];
+
+}
+
+
+
+let index=
 Math.floor(
-Math.random()*(i+1)
+Math.random()*pool.length
 );
 
 
-[
-options[i],
-options[j]
-]=
-[
-options[j],
-options[i]
-];
+
+list.push(pool[index]);
+
+
+
+pool.splice(index,1);
+
+
+
+}
+
+
+
+return list;
+
+
+}
+
+
+// 生成20题随机
+
+let gameQuestions=createGameQuestions();
+
+
+
+
+let index=
+Math.floor(
+Math.random()*pool.length
+);
+
+
+gameQuestions.push(
+pool[index]
+);
+
+
+pool.splice(index,1);
+
+
+}
 
 
 }
@@ -816,91 +865,17 @@ options[i]
 
 
 
-return {
-
-
-q:p.q,
-
-
-a:options,
-
-
-correct:p.correct
-
-
-};
-
-
-}
-
-
-
-
-
-// =============================
+// ==========================
 // 显示题目
-// =============================
+// ==========================
 
 
 function showQuestion(data){
 
-
-if(!data.player2){
-
-document
-.getElementById("status")
-.innerHTML=
-"等待玩家2加入...";
-
-
-return;
-
-}
-
-
-
+updateStatus(data);
 if(data.finished){
 
-return;
-
-}
-
-
-
-//第一次创建题目
-
-if(!data.question){
-
-
-
-if(playerID=="player1"){
-
-
-let q =
-createQuestion(
-data.questionIndex
-);
-
-
-
-update(
-
-ref(
-db,
-"rooms/"+roomID
-),
-
-{
-
-question:q
-
-}
-
-);
-
-
-}
-
+showResult(data);
 
 return;
 
@@ -908,101 +883,81 @@ return;
 
 
 
+let index=data.index||0;
 
 
-let q =
-data.question;
 
+let q=gameQuestions[index];
+
+
+
+if(!q){
+
+gameQuestions=createGameQuestions();
+
+q=gameQuestions[index];
+
+}
 
 
 document
 .getElementById("question")
-.innerHTML =
-q.q;
+.innerHTML=q.q;
 
 
 
-let myTurn =
+let box=
+document.getElementById("options");
 
-(
-data.turn==1
-&&
-playerID=="player1"
-)
-
-||
-
-(
-data.turn==2
-&&
-playerID=="player2"
-);
-
-
-
-document
-.getElementById("status")
-.innerHTML =
-
-myTurn
-
-?
-
-"轮到你答题"
-
-:
-
-"等待对方答题";
-
-
-
-
-let box =
-document
-.getElementById("options");
 
 
 box.innerHTML="";
 
 
 
-q.a.forEach(item=>{
+let canAnswer=
+(data.turn==1&&playerID=="player1")
+||
+(data.turn==2&&playerID=="player2");
 
 
-let btn =
+
+let arr=[...q.a];
+
+
+
+arr.sort(
+()=>Math.random()-0.5
+);
+
+
+
+arr.forEach(text=>{
+
+
+let btn=
 document.createElement("button");
-
 
 
 btn.className="option";
 
 
-
-btn.innerHTML=item;
-
+btn.innerHTML=text;
 
 
-if(myTurn){
+
+btn.disabled=!canAnswer;
+
+
+
+if(canAnswer){
 
 
 btn.onclick=()=>{
 
-
-answer(
-item,
-data
-);
-
+answer(text,data);
 
 };
-
-
-}
-
-else{
-
-
-btn.disabled=true;
 
 
 }
@@ -1016,263 +971,371 @@ box.appendChild(btn);
 });
 
 
-
 }
 
-// =============================
-// 回答问题
-// =============================
+
+
+// ==========================
+// 回答
+// ==========================
 
 
 async function answer(choice,data){
 
 
-if(locked){
 
-return;
-
-}
-
-
-locked=true;
+let q=
+gameQuestions[data.index];
 
 
 
-let correct =
-data.question.correct;
+let win=
+choice==q.c;
 
 
 
-let right =
-choice===correct;
+let s1=
+data.player1?.score||0;
 
 
-
-let score1 =
-data.player1?.score || 0;
-
-
-let score2 =
-data.player2?.score || 0;
+let s2=
+data.player2?.score||0;
 
 
-
-// 玩家1答题
 
 if(playerID=="player1"){
 
 
+if(win){
 
-if(right){
-
-score1+=10;
+s1+=10;
 
 }
 
 
 
 await update(
-
-ref(
-db,
-"rooms/"+roomID
-),
-
+ref(db,"rooms/"+roomID),
 {
 
 
-"player1/score":score1,
+"player1/score":s1,
 
 
 turn:2
 
 
-}
-
-);
-
-
-
-}
-
-
-
-// 玩家2答题
-
-else{
-
-
-
-if(right){
-
-score2+=10;
-
-}
-
-
-
-let next =
-Number(
-data.questionIndex
-)+1;
-
-
-
-if(next>=maxQuestion){
-
-
-
-await update(
-
-ref(
-db,
-"rooms/"+roomID
-),
-
-{
-
-
-"player2/score":score2,
-
-
-finished:true,
-
-
-turn:0
-
-
-}
-
-
-);
-
+});
 
 
 }else{
 
 
+if(win){
 
-let newQuestion =
-createQuestion(next);
+s2+=10;
 
+}
+
+
+
+let next=
+(data.index||0)+1;
+
+
+
+if(next>=20){
 
 
 await update(
-
-ref(
-db,
-"rooms/"+roomID
-),
-
+ref(db,"rooms/"+roomID),
 {
 
 
-"player2/score":score2,
+"player2/score":s2,
+
+finished:true
 
 
-questionIndex:next,
+});
 
 
-question:newQuestion,
+}else{
 
 
-turn:1
+await update(
+ref(db,"rooms/"+roomID),
+{
+
+
+"player2/score":s2,
+
+
+turn:1,
+
+
+index:next
+
+
+});
 
 
 }
-
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-setTimeout(()=>{
-
-
-locked=false;
-
-
-},500);
-
 
 
 }
 
 
 
+}
 
 
-// =============================
-// 游戏结束显示
-// =============================
+
+
+// ==========================
+// 结束显示
+// ==========================
 
 
 function showResult(data){
 
 
 
-let s1 =
-data.player1?.score || 0;
-
-
-let s2 =
-data.player2?.score || 0;
-
-
-
 document
 .getElementById("question")
 .innerHTML=
-"🎉 游戏结束";
+"🎉比赛结束";
 
 
 
 document
 .getElementById("options")
 .innerHTML=
-"";
+`
 
 
-let text="";
+<h3>
+玩家1：${data.player1.score}分
+</h3>
 
 
-if(s1>s2){
+<h3>
+玩家2：${data.player2.score}分
+</h3>
 
-text="🏆 玩家1胜利";
 
-}
+<button id="again">
+再来一局
+</button>
 
-else if(s2>s1){
 
-text="🏆 玩家2胜利";
-
-}
-
-else{
-
-text="🤝 平局";
-
-}
+`;
 
 
 
 document
-.getElementById("status")
-.innerHTML=
+.getElementById("again")
+.onclick=
+restart;
 
-text+
 
-"<br>玩家1："+s1+
-"分<br>玩家2："+s2+
-"分";
+
+}
+
+
+
+async function restart(){
+
+
+makeQuestions();
+
+
+
+await update(
+ref(db,"rooms/"+roomID),
+{
+
+
+player1:{
+score:0
+},
+
+
+player2:{
+score:0
+},
+
+
+finished:false,
+
+
+turn:1,
+
+
+index:0
+
+
+});
+
+
+}
+// ==========================
+// 房间清理
+// ==========================
+
+
+// 玩家退出
+
+async function leaveRoom(){
+
+
+if(!roomID){
+
+return;
+
+}
+
+
+
+await remove(
+ref(db,"rooms/"+roomID)
+);
+
+
+
+location.reload();
+
+
+}
+
+
+
+// ==========================
+// 重新开始
+// ==========================
+
+
+async function restart(){
+
+
+
+let newQuestions=
+createGameQuestions();
+
+
+
+gameQuestions=newQuestions;
+
+
+
+await update(
+
+ref(db,"rooms/"+roomID),
+
+{
+
+
+player1:{
+
+score:0
+
+},
+
+
+player2:{
+
+score:0
+
+},
+
+
+finished:false,
+
+
+turn:1,
+
+
+index:0
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+// ==========================
+// 断线清理
+// ==========================
+
+
+window.addEventListener(
+"beforeunload",
+()=>{
+
+
+if(roomID){
+
+remove(
+ref(db,"rooms/"+roomID)
+);
+
+
+}
+
+
+});
+
+
+
+
+// ==========================
+// 游戏状态提示优化
+// ==========================
+
+
+function updateStatus(data){
+
+
+let status=
+document.getElementById("status");
+
+
+
+if(!data.player2){
+
+
+status.innerHTML=
+"等待玩家2加入...";
+
+
+return;
+
+
+}
+
+
+
+if(data.turn==1){
+
+
+status.innerHTML=
+"玩家1答题";
+
+
+}else{
+
+
+status.innerHTML=
+"玩家2答题";
+
+
+}
 
 
 
@@ -1282,25 +1345,16 @@ text+
 
 
 
-// =============================
-// 绑定按钮
-// =============================
-
-alert("代码加载成功");
-
-window.createRoom =
-createRoom;
+// 监听加入状态
 
 
-window.joinRoom =
-joinRoom;
-
-
+window.createRoom=createRoom;
+window.joinRoom=joinRoom;
+window.restart=restart;
+window.leaveRoom=leaveRoom;
 
 </script>
 
-
 </body>
-
 
 </html>
