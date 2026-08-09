@@ -168,7 +168,33 @@ async function createRoom(){
     listenRoom();
 }
 
-// 加入房间
+// 创建房间
+async function createRoom(){
+    let input=document.getElementById("roomInput").value.trim();
+    if(input) roomID=input;
+    else roomID=Math.floor(100000+Math.random()*900000).toString();
+
+    const check=await get(ref(db,"rooms/"+roomID));
+    if(check.exists()){
+        alert("房间已存在，请更换房间号");
+        return;
+    }
+    playerID="player1";
+    gameQuestions=createGameQuestions();
+    await set(ref(db,"rooms/"+roomID),{
+        player1:{score:0},
+        player2:null,
+        state:"waiting",
+        turn:1,
+        index:0,
+        finished:false,
+        time:Date.now()
+    });
+    enterRoom();
+    listenRoom();
+}
+
+// 【修复版】加入房间
 async function joinRoom(){
     roomID=document.getElementById("roomInput").value.trim();
     if(!roomID){
@@ -186,7 +212,8 @@ async function joinRoom(){
         return;
     }
     playerID="player2";
-    gameQuestions=createGameQuestions();
+    // 关键修复：不要本地重新生成题库！题库以房主为准
+    // gameQuestions=createGameQuestions(); 删掉这一行！
     await update(ref(db,"rooms/"+roomID),{
         player2:{score:0},
         state:"playing"
@@ -194,6 +221,7 @@ async function joinRoom(){
     enterRoom();
     listenRoom();
 }
+
 
 // 切换游戏界面
 function enterRoom(){
