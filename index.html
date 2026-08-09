@@ -1,42 +1,452 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
-<title>TGame</title>
+
+<title>TGame 双人诗词小游戏 V1.0</title>
+
+
 <style>
+
 body{
-  margin:0;
-  background:#111;
-  color:white;
-  text-align:center;
-  font-family:sans-serif;
+margin:0;
+background:#111;
+color:white;
+font-family:"Microsoft YaHei";
+text-align:center;
 }
+
+
+.box{
+
+max-width:600px;
+margin:auto;
+padding:20px;
+
+}
+
+
 h1{
-  margin-top:50px;
+
+color:#ffd700;
+
 }
+
+
+.card{
+
+background:#222;
+border-radius:20px;
+padding:25px;
+margin-top:20px;
+
+}
+
+
 button{
-  padding:15px 30px;
-  font-size:20px;
-  border-radius:10px;
+
+width:80%;
+padding:15px;
+
+margin:10px;
+
+border:none;
+
+border-radius:15px;
+
+font-size:18px;
+
+background:#d4af37;
+
+color:#111;
+
 }
+
+
+button:hover{
+
+background:#fff;
+
+}
+
+
+.score{
+
+display:flex;
+
+justify-content:space-around;
+
+font-size:20px;
+
+}
+
+
+#question{
+
+font-size:22px;
+
+line-height:1.6;
+
+}
+
+
+.win{
+
+font-size:30px;
+
+color:#ffd700;
+
+}
+
 </style>
+
 </head>
+
+
 
 <body>
 
+
+<div class="box">
+
+
 <h1>🎮 TGame</h1>
 
-<p>双人诗词小游戏</p>
+<p>双人诗词小游戏 V1.0</p>
+
+
+<div class="card">
+
+
+<div class="score">
+
+<div>
+玩家1
+<br>
+<span id="p1">0</span>
+</div>
+
+
+<div>
+玩家2
+<br>
+<span id="p2">0</span>
+</div>
+
+</div>
+
+
+
+<h2 id="turn">
+玩家1回合
+</h2>
+
+
+<div id="question">
+
+点击开始游戏
+
+</div>
+
+
+
+<div id="answers"></div>
+
+
 
 <button onclick="startGame()">
 开始游戏
 </button>
 
+
+</div>
+
+
+
+<div id="result"></div>
+
+
+</div>
+
+
+
 <script>
-function startGame(){
- alert("游戏启动成功！");
+
+
+let poems=[
+
+
+{
+q:"床前明月光，下一句是？",
+
+a:[
+"疑是地上霜",
+"举头望明月",
+"低头思故乡",
+"明月几时有"
+],
+
+c:0
+},
+
+
+
+{
+q:"白日依山尽，下一句？",
+
+a:[
+"黄河入海流",
+"欲穷千里目",
+"更上一层楼",
+"江山如此多娇"
+],
+
+c:2
+},
+
+
+
+{
+q:"海内存知己，下一句？",
+
+a:[
+"天涯若比邻",
+"相逢何必曾相识",
+"君不见黄河之水",
+"人生得意须尽欢"
+],
+
+c:0
+},
+
+
+
+{
+q:"大漠孤烟直，下一句？",
+
+a:[
+"长河落日圆",
+"孤帆远影碧空尽",
+"千里共婵娟",
+"月落乌啼霜满天"
+],
+
+c:0
+},
+
+
+
+{
+q:"会当凌绝顶，下一句？",
+
+a:[
+"一览众山小",
+"凌寒独自开",
+"飞流直下三千尺",
+"天下谁人不识君"
+],
+
+c:0
+},
+
+
+
+{
+q:"桃李不言，下自成蹊，出自？",
+
+a:[
+"史记",
+"诗经",
+"论语",
+"唐诗三百首"
+],
+
+c:0
 }
+
+
+
+];
+
+
+
+let p1=0;
+
+let p2=0;
+
+let turn=1;
+
+let count=0;
+
+let current;
+
+
+
+function startGame(){
+
+p1=0;
+
+p2=0;
+
+turn=1;
+
+count=0;
+
+document.getElementById("p1").innerHTML=0;
+
+document.getElementById("p2").innerHTML=0;
+
+document.getElementById("result").innerHTML="";
+
+next();
+
+}
+
+
+
+function next(){
+
+
+if(count>=10){
+
+endGame();
+
+return;
+
+}
+
+
+let index=Math.floor(Math.random()*poems.length);
+
+
+current=poems[index];
+
+
+document.getElementById("turn").innerHTML=
+"玩家"+turn+"回合";
+
+
+document.getElementById("question").innerHTML=
+current.q;
+
+
+let html="";
+
+
+current.a.forEach((x,i)=>{
+
+
+html+=
+
+"<button onclick='answer("+i+")'>"+x+"</button>";
+
+
+});
+
+
+document.getElementById("answers").innerHTML=html;
+
+
+}
+
+
+
+function answer(i){
+
+
+if(i==current.c){
+
+
+if(turn==1){
+
+p1++;
+
+document.getElementById("p1").innerHTML=p1;
+
+}else{
+
+p2++;
+
+document.getElementById("p2").innerHTML=p2;
+
+}
+
+
+alert("回答正确！");
+
+
+}else{
+
+
+alert("回答错误！");
+
+}
+
+
+
+count++;
+
+
+turn=turn==1?2:1;
+
+
+next();
+
+
+}
+
+
+
+function endGame(){
+
+
+let text="";
+
+
+if(p1>p2){
+
+text="🎉 玩家1胜利！";
+
+}
+
+else if(p2>p1){
+
+text="🎉 玩家2胜利！";
+
+}
+
+else{
+
+text="🤝 平局！";
+
+}
+
+
+
+document.getElementById("answers").innerHTML="";
+
+
+document.getElementById("question").innerHTML=
+"游戏结束";
+
+
+document.getElementById("result").innerHTML=
+
+"<div class='win'>"+text+
+
+"<br>最终比分 "+p1+" : "+p2+
+
+"</div>";
+
+}
+
+
+
 </script>
 
+
 </body>
+
 </html>
