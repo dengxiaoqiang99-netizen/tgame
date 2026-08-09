@@ -377,12 +377,42 @@ const maxQuestion=20;
 async function createRoom(){
 
 
-roomID =
-Math.floor(
-100000+
-Math.random()*900000
-)
-.toString();
+let input =
+document
+.getElementById("roomInput")
+.value
+.trim();
+
+
+
+if(input.length<3){
+
+alert("请输入至少3位房间号");
+
+return;
+
+}
+
+
+
+roomID=input;
+
+
+let old =
+await get(
+ref(db,"rooms/"+roomID)
+);
+
+
+if(old.exists()){
+
+
+alert("房间已经存在");
+
+return;
+
+
+}
 
 
 
@@ -394,10 +424,7 @@ myName="玩家1";
 
 await set(
 
-ref(
-db,
-"rooms/"+roomID
-),
+ref(db,"rooms/"+roomID),
 
 {
 
@@ -409,30 +436,17 @@ score:0
 },
 
 
-
 player2:null,
 
-
-
-// 当前轮到谁
 
 turn:1,
 
 
-
-// 当前题号
-
 questionIndex:0,
 
 
-
-// 当前题目
-
 question:null,
 
-
-
-// 游戏结束
 
 finished:false
 
@@ -443,11 +457,10 @@ finished:false
 
 
 
-
 enterGame();
 
-
 listenRoom();
+
 
 
 
@@ -476,7 +489,7 @@ document
 
 
 
-if(code==""){
+if(!code){
 
 alert("请输入房间号");
 
@@ -492,12 +505,7 @@ roomID=code;
 
 let snap =
 await get(
-
-ref(
-db,
-"rooms/"+roomID
-)
-
+ref(db,"rooms/"+roomID)
 );
 
 
@@ -505,7 +513,7 @@ db,
 if(!snap.exists()){
 
 
-alert("房间不存在");
+alert("没有找到这个房间");
 
 
 return;
@@ -522,7 +530,7 @@ let data=snap.val();
 if(data.player2){
 
 
-alert("房间已满");
+alert("房间已经满了");
 
 
 return;
@@ -540,22 +548,15 @@ myName="玩家2";
 
 await update(
 
-ref(
-db,
-"rooms/"+roomID
-),
+ref(db,"rooms/"+roomID),
 
 {
 
-
 player2:{
-
 
 score:0
 
-
 }
-
 
 }
 
@@ -563,9 +564,7 @@ score:0
 
 
 
-
 enterGame();
-
 
 listenRoom();
 
